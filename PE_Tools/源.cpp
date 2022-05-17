@@ -11,7 +11,7 @@ int main(void)
 	DWORD localImage = GetLocalImage();
 	//_RVAToFOA(localImage, 0x1010);
 
-	DWORD rva = _rDDEntry(localImage, _RDATA_SECTION, IMAGE_FLAG_IMAGE, IR_FOA);
+	//DWORD rva = _rDDEntry(localImage, _RDATA_SECTION, IMAGE_FLAG_IMAGE, IR_FOA);
 
-	printf("localImage: %x\r\n", rva);
+	//printf("localImage: %x\r\n", rva);
 }
