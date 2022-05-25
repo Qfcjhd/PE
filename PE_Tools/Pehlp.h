@@ -112,6 +112,31 @@ DWORD _rSection(DWORD _lpHeader, DWORD _index, IMAGE_FLAG _imageFlag, IMAGE_RESU
 DWORD _getRVASectionName(DWORD _lpFileHeader, DWORD _dwRVA);
 
 /*
+	将内存偏移量RVA转换为文件偏移
+	@_lpFileHead:为文件头的起始地址
+	@_dwRVA:为给定的RVA地址
+*/
+DWORD _RVAToOffset(DWORD _lpFileHead, DWORD _dwRVA);
+
+/*
 	判断标志位是否为 1
 */
 //BOOLEAN IsFlag(PE_FLAG_15 peFlag,DWORD flag);
+
+/*
+	加载文件到内存
+	@filePath: 文件路径
+	@mem: 成功加载返回地址
+	@return: 返回文件大小, 错误返回-1
+	@ps: 使用完之后一定使用 VirtualFree(mem, 0, MEM_RELEASE) 释放内存
+*/
+DWORD _FileToFileBuffer(IN LPSTR* filePath, OUT LPVOID* mem);
+
+/*
+	验证DosSignature 是否正确
+*/
+BOOL IsDosSignature(LPVOID mem);
+
+
+
+VOID _getImportInfo(DWORD _lpFileHeader);

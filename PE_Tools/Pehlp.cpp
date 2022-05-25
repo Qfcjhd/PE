@@ -21,6 +21,7 @@ DWORD _RVAToFOA(DWORD _lpFileHead, DWORD _dwRVA)
 		if (_dwRVA >= sectionHeader[i].VirtualAddress && _dwRVA < sectionEnd)
 		{
 			off = sectionEnd - _dwRVA + sectionHeader[i].PointerToRawData;
+			break;
 		}
 	}
 	return off;
@@ -192,3 +193,85 @@ DWORD _getRVASectionName(DWORD _lpFileHeader, DWORD _dwRVA)
 //{
 //	return flag & peFlag ? TRUE : FALSE;
 //}
+
+DWORD _FileToFileBuffer(IN LPSTR* filePath, OUT LPVOID* mem)
+{
+	FILE* _Post_ _Notnull_ pF;
+	errno_t err = fopen_s(&pF, (char*)filePath, "rb+");
+	if (err) {
+		printf("加载文件失败 %s\r\n", __FUNCTION__);
+		return -1;
+	}
+
+	fseek(pF, 0, SEEK_END);
+	ULONG len = ftell(pF);
+	fseek(pF, 0, SEEK_SET);
+
+	if (!len) {
+		printf("文件大小获取失败 %s\r\n", __FUNCTION__);
+		return -1;
+	}
+
+	LPVOID adderss = VirtualAlloc(NULL, len, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+	if (!adderss) {
+		printf("申请内存失败 %s\r\n", __FUNCTION__);
+		return -1;
+	}
+
+	size_t count = fread_s(adderss, len, 1, len, pF);
+
+	*mem = adderss;
+	fclose(pF);
+
+	return len;
+}
+
+BOOL IsDosSignature(LPVOID mem)
+{
+	if (*((PWORD)mem) != IMAGE_DOS_SIGNATURE)
+	{
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+DWORD _RVAToOffset(DWORD _lpFileHead, DWORD _dwRVA)
+{
+	PIMAGE_DOS_HEADER dosHeader = (PIMAGE_DOS_HEADER)_lpFileHead;
+	PIMAGE_NT_HEADERS imageNtHeader = (PIMAGE_NT_HEADERS)(_lpFileHead + (DWORD)dosHeader->e_lfanew);
+	DWORD off = 0;
+
+	PIMAGE_SECTION_HEADER sectionHeader = (PIMAGE_SECTION_HEADER)((DWORD)imageNtHeader + sizeof(IMAGE_NT_HEADERS));
+	DWORD sectionNumber = (DWORD)imageNtHeader->FileHeader.NumberOfSections;
+
+	for (DWORD i = 0; i < sectionNumber; i++)
+	{
+		DWORD sectionEnd = sectionHeader[i].VirtualAddress + sectionHeader[i].SizeOfRawData;
+		if (_dwRVA >= sectionHeader[i].VirtualAddress && _dwRVA < sectionEnd)
+		{
+			off = _dwRVA - sectionHeader[i].VirtualAddress + sectionHeader[i].PointerToRawData;
+			break;
+		}
+	}
+	return off;
+}
+
+VOID _getImportInfo(DWORD _lpFileHeader)
+{
+	PIMAGE_DOS_HEADER dosHeader = (PIMAGE_DOS_HEADER)_lpFileHeader;
+	PIMAGE_NT_HEADERS ntHeader = (PIMAGE_NT_HEADERS)(_lpFileHeader + (DWORD)dosHeader->e_lfanew);
+
+	IMAGE_DATA_DIRECTORY _Import = ntHeader->OptionalHeader.DataDirectory[1];
+	if (!_Import.VirtualAddress) {
+		printf("%s\r\n",__FUNCTION__);
+		return;
+	}
+
+	DWORD FOA = _RVAToOffset(_lpFileHeader, _Import.VirtualAddress);
+	PIMAGE_IMPORT_DESCRIPTOR imageImportDesc = (PIMAGE_IMPORT_DESCRIPTOR)(_lpFileHeader + FOA);
+
+
+	PIMAGE_SECTION_HEADER sectionHeader = (PIMAGE_SECTION_HEADER)_getRVASectionName(_lpFileHeader, imageImportDesc->OriginalFirstThunk);
+	printf("%s\r\n", sectionHeader->Name);
+}
