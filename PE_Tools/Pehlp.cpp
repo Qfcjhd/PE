@@ -271,7 +271,44 @@ VOID _getImportInfo(DWORD _lpFileHeader)
 	DWORD FOA = _RVAToOffset(_lpFileHeader, _Import.VirtualAddress);
 	PIMAGE_IMPORT_DESCRIPTOR imageImportDesc = (PIMAGE_IMPORT_DESCRIPTOR)(_lpFileHeader + FOA);
 
-
 	PIMAGE_SECTION_HEADER sectionHeader = (PIMAGE_SECTION_HEADER)_getRVASectionName(_lpFileHeader, imageImportDesc->OriginalFirstThunk);
-	printf("%s\r\n", sectionHeader->Name);
+	printf("导入表所在节: %s\r\n", sectionHeader->Name);
+
+	while (imageImportDesc->OriginalFirstThunk || imageImportDesc->TimeDateStamp
+		|| imageImportDesc->ForwarderChain || imageImportDesc->Name || imageImportDesc->FirstThunk)
+	{
+		FOA = _RVAToOffset(_lpFileHeader, imageImportDesc->Name);
+		PCHAR name1 = (PCHAR)(_lpFileHeader + FOA);
+		printf("===DLL Name: %s===\r\n", name1);
+
+		DWORD thunkData;
+		if (imageImportDesc->OriginalFirstThunk)
+			thunkData = imageImportDesc->OriginalFirstThunk;
+		else
+			thunkData = imageImportDesc->FirstThunk;
+
+		FOA = _RVAToOffset(_lpFileHeader, thunkData);
+		thunkData = _lpFileHeader + FOA;
+
+		while (*(PDWORD)thunkData)
+		{
+			//序号导入
+			if (*(PDWORD)thunkData & IMAGE_ORDINAL_FLAG32) 
+			{
+				DWORD tempData = *(PDWORD)thunkData & 0xffff;
+				printf("  序号: %x\r\n", tempData);
+			}
+			//名称导入
+			else
+			{
+				FOA = _RVAToOffset(_lpFileHeader, *(PDWORD)thunkData);
+				PIMAGE_IMPORT_BY_NAME imageImportName = (PIMAGE_IMPORT_BY_NAME)(_lpFileHeader + FOA);
+				printf("  编号: %x | 名字: %s\r\n", imageImportName->Hint, imageImportName->Name);
+			}
+
+			thunkData += 4;
+		}
+
+		imageImportDesc = (PIMAGE_IMPORT_DESCRIPTOR)((DWORD)imageImportDesc + sizeof IMAGE_IMPORT_DESCRIPTOR);
+	}
 }

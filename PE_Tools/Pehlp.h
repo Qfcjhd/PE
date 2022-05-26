@@ -134,9 +134,13 @@ DWORD _FileToFileBuffer(IN LPSTR* filePath, OUT LPVOID* mem);
 
 /*
 	验证DosSignature 是否正确
+	@mem: 内存
 */
 BOOL IsDosSignature(LPVOID mem);
 
 
-
+/*
+	获取导入表
+	@_lpFileHeader: 映射到内存的文件地址
+*/
 VOID _getImportInfo(DWORD _lpFileHeader);
