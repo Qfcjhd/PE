@@ -286,7 +286,6 @@ VOID _getImportInfo(DWORD _lpFileHeader)
 			thunkData = imageImportDesc->OriginalFirstThunk;
 		else
 			thunkData = imageImportDesc->FirstThunk;
-
 		FOA = _RVAToOffset(_lpFileHeader, thunkData);
 		thunkData = _lpFileHeader + FOA;
 
@@ -301,6 +300,8 @@ VOID _getImportInfo(DWORD _lpFileHeader)
 			//名称导入
 			else
 			{
+				printf("函数RVA: %x\r\n", *(PDWORD)thunkData);
+
 				FOA = _RVAToOffset(_lpFileHeader, *(PDWORD)thunkData);
 				PIMAGE_IMPORT_BY_NAME imageImportName = (PIMAGE_IMPORT_BY_NAME)(_lpFileHeader + FOA);
 				printf("  编号: %x | 名字: %s\r\n", imageImportName->Hint, imageImportName->Name);

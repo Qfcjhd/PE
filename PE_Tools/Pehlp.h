@@ -142,5 +142,13 @@ BOOL IsDosSignature(LPVOID mem);
 /*
 	获取导入表
 	@_lpFileHeader: 映射到内存的文件地址
+	ps:
+		0004106F      | FF15 60400400       | call dword ptr ds:[<&MessageBoxA>]  |
+		1.当前程序中ImageBase: 0x40000, 内存中断到MessageBoxA后,查看硬编码为: 60400400 -> 0x44060
+		2.当前文件对齐为200 , 内存对齐为1000
+		3.套用RvaToOff函数, 传入 0x44060 - 0x40000 = RVA, 计算得出0x3460 (文件偏移)
+		4.文件开始地址 + 0x3460 取出的值 = 502C
+		5.打印IAT地址,找到MessageBoxA RVA 地址正是502c, 此函数正式从user32.dll 按名字导入的
+
 */
 VOID _getImportInfo(DWORD _lpFileHeader);
