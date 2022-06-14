@@ -313,3 +313,34 @@ VOID _getImportInfo(DWORD _lpFileHeader)
 		imageImportDesc = (PIMAGE_IMPORT_DESCRIPTOR)((DWORD)imageImportDesc + sizeof IMAGE_IMPORT_DESCRIPTOR);
 	}
 }
+
+DWORD _getApi(DWORD _hMoudle, char* funName)
+{
+	DWORD ret = 0;
+	if (funName == NULL)
+		return ret;
+
+	PIMAGE_DOS_HEADER dosHeader = (PIMAGE_DOS_HEADER)_hMoudle;
+	PIMAGE_NT_HEADERS imageNtHeader = (PIMAGE_NT_HEADERS)(_hMoudle + (DWORD)dosHeader->e_lfanew);
+
+	PIMAGE_EXPORT_DIRECTORY imageExportDir = (PIMAGE_EXPORT_DIRECTORY)(imageNtHeader->OptionalHeader.DataDirectory[0].VirtualAddress + _hMoudle);
+
+	DWORD i = 0;
+	PDWORD PAddressOfNames = (PDWORD)(imageExportDir->AddressOfNames + _hMoudle);
+	do
+	{
+		char* fName = (char*)(PAddressOfNames[i] + _hMoudle);
+		if (strcmp(funName, fName) == 0)
+		{
+			PWORD pAddressOfNameOrdinals = (PWORD)(imageExportDir->AddressOfNameOrdinals + _hMoudle);
+			PDWORD pFuncAddr = (PDWORD)(imageExportDir->AddressOfFunctions + _hMoudle);
+
+			DWORD funIndex = pAddressOfNameOrdinals[i];
+			ret = pFuncAddr[funIndex] + _hMoudle;
+		}
+		i++;
+	} while (i < imageExportDir->NumberOfNames);
+
+
+	return ret;
+}

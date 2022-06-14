@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <Windows.h>
 
+#define EXPORT_API extern "C" __declspec(dllexport)
+
 /*
 	返回标志位值
 	@PE_FLAG: PE_FLAG_15
@@ -53,14 +55,14 @@ enum PE_FLAG_15
 /*
 	获取自身Image
 */
-DWORD GetLocalImage();
+EXPORT_API DWORD GetLocalImage();
 
 /*
 	RVA 转 FOA
 	@_lpFileHead: 文件头基址
 	@_dwRVA: 给定RVA地址
 */
-DWORD _RVAToFOA(DWORD _lpFileHead, DWORD _dwRVA);
+EXPORT_API DWORD _RVAToFOA(DWORD _lpFileHead, DWORD _dwRVA);
 
 /*
 	数据目录定位
@@ -152,3 +154,11 @@ BOOL IsDosSignature(LPVOID mem);
 
 */
 VOID _getImportInfo(DWORD _lpFileHeader);
+
+/*
+	获取指定Api函数调用的地址
+	@_hMoudle:动态链接库基址
+	@funName: 函数名字
+	@ret: 函数地址 + 模块地址
+*/
+DWORD _getApi(DWORD _hMoudle, char* funName);

@@ -25,7 +25,7 @@ int main(void)
 	//printf("localImage: %x\r\n", status);
 
 
-	LPVOID mem;
+	/*LPVOID mem;
 	DWORD len = _FileToFileBuffer((LPSTR*)PATH, &mem);
 
 	PIMAGE_DOS_HEADER imageDosHeader = (PIMAGE_DOS_HEADER)mem;
@@ -38,7 +38,10 @@ int main(void)
 	_getImportInfo((DWORD)mem);
 
 
-	BOOL status = VirtualFree(mem, 0, MEM_RELEASE);
+	BOOL status = VirtualFree(mem, 0, MEM_RELEASE);*/
+
+	char funcName[] = "GetLocalImage";
+	_getApi(GetLocalImage(), funcName);
 
 }
 

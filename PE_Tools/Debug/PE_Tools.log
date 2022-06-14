@@ -1,3 +1,4 @@
-﻿  源.cpp
+﻿  Pehlp.cpp
 Pehlp.obj : warning LNK4075: 忽略“/EDITANDCONTINUE”(由于“/INCREMENTAL:NO”规范)
+    正在创建库 D:\C\git\PE\Debug\PE_Tools.lib 和对象 D:\C\git\PE\Debug\PE_Tools.exp
   PE_Tools.vcxproj -> D:\C\git\PE\Debug\PE_Tools.exe
