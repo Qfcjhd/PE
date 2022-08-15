@@ -344,3 +344,32 @@ DWORD _getApi(DWORD _hMoudle, char* funName)
 
 	return ret;
 }
+
+void _getExportInfo(DWORD _lpFile, DWORD _lpHead)
+{
+	if (_lpHead == NULL)
+		return;
+	PIMAGE_NT_HEADERS pNtHeader = (PIMAGE_NT_HEADERS)_lpHead;
+	DWORD exportRVA = pNtHeader->OptionalHeader.DataDirectory[0].VirtualAddress;
+	if (!exportRVA)
+		return;
+
+	//导出表文件偏移位置
+	DWORD exportOff =  _RVAToOffset(_lpFile,exportRVA) + _lpFile;
+	PIMAGE_EXPORT_DIRECTORY pExportDirectory = (PIMAGE_EXPORT_DIRECTORY)exportOff;
+	DWORD off = _RVAToFOA(_lpFile, pExportDirectory->Name) + _lpFile;
+	PIMAGE_SECTION_HEADER pSectionHeader = (PIMAGE_SECTION_HEADER)_getRVASectionName(_lpFile, pExportDirectory->Name);
+	printf("导入表所在节: %s\r\n", pSectionHeader->Name);
+
+	DWORD lpAddressOfNames = _RVAToFOA(_lpFile, pExportDirectory->AddressOfNames) + _lpFile;
+	DWORD lpAddressOfNameOrdinals = _RVAToFOA(_lpFile, pExportDirectory->AddressOfNameOrdinals) + _lpFile;
+	DWORD lpAddressOfFunctions = _RVAToFOA(_lpFile, pExportDirectory->AddressOfFunctions) + _lpFile; //函数地址表
+	
+	int numberOfFunctions = pExportDirectory->NumberOfFunctions;
+
+	while(numberOfFunctions != 0)
+	{
+		numberOfFunctions = pExportDirectory->NumberOfNames;
+		
+	}
+}
